@@ -1,11 +1,14 @@
 <template>
     <div id="app" style="display: flex;flex-direction: row">
 
-        
+      
         <el-menu :router="true" default-active="moduleCode" class="el-menu-vertical-demo" :collapse="false">
-            
+            <div class="loginName">
+                <span>用户名: {{this.logincode}}</span>
+                <a class="logout-btn" href="../logout">登出</a>
+            </div>
             <div v-for="(menuItem,index) in this.menuTree" :key="index">
-                   <el-submenu :index="menuItem.code">
+                   <el-submenu :index="menuItem.code"  v-show="menuItem.visible">
                        <template slot="title">
                             <i class="el-icon-location"></i>
                             <span slot="title">{{menuItem.name}}</span>
@@ -13,8 +16,8 @@
                         <el-menu-item-group>
                              <div class="child-menu"> 
                                 
-                                <li v-for="item3 in menuItem.children" :key="item3.code"
-                                    :class="{'active':item3.path == currSubMenuPath}">
+                                <li v-for="item3 in menuItem.children" :key="item3.code" v-show="item3.visible"
+                                    :class="{'active':item3.path == currSubMenuPath}" >
                                     <a :href="menuItem.path+item3.path">{{item3.name}}</a>
                                 </li>
                                 <!-- <el-menu-item :index="item.code" :route="item.path">{{item.name}}</el-menu-item> -->
@@ -37,56 +40,19 @@
     </div>
 </template>
 <script>
-import {menuTree} from './menu'
+
+var menuTest=require('./menu.json');
 export default {
+    
     data(){
         return{
             isCollapse: true,
             transitionName: 'slide-left', 
+            logincode:'',
             currNavMenuCode: this.moduleCode,
             currSubMenuPath:this.$route.path,
-            menuTree: [
-                {
-                    code:"shi",
-                    name:"个人网站",
-                    path:"boot.html#",
-                    visible:false,
-                    children:[
-                        {
-                            code: "shi:test1",
-                            name: "ceshi1",
-                            path: "/boot",
-                            visible: false
-                        },
-                        {
-                            code: "shi:test2",
-                            name: "ceshi2",
-                            path: "/boot2",
-                            visible: false
-                        },
-                    ]
-                },
-                {
-                    code:"shiro",
-                    name:"权限管理",
-                    path:"shiro_management.html#",
-                    visible:false,
-                    children:[
-                        {
-                            code: "shiro:user",
-                            name: "用户管理",
-                            path: "/user",
-                            visible: false
-                        },
-                        {
-                            code: "shiro:role",
-                            name: "角色管理",
-                            path: "/role",
-                            visible: false
-                        },
-                    ]
-                }
-            ],
+            menuTree: [],
+               
         }
     },
     props: {
@@ -101,18 +67,64 @@ export default {
             }
         },
     methods:{
-
-        handleData(){
-            //  this.$ajax.post('../api/user/menu',{}, function (data) {
-            //     if (data) {
-            //             var logincode = data.operatorName;
-                        
-            //             var permissionList = data.userPermission;
-            //             console.log(logincode);
-            //              console.log(permissionList);
-            //     }
-            //  }.bind(this));
+        handleLogin(){
+            this.$ajax.post('../logout',{}, function (data) {
             
+             }.bind(this));
+        },
+        handleData(){
+          
+             this.$ajax.post('../api/user/menu',{}, function (data) {
+                if (data) {
+                        this.logincode = data.operatorName;
+                        //console.log(this.logincode)
+                        var permissionList = data.userPermission;
+                        localStorage.setItem('permissionList',JSON.stringify(permissionList));
+                        var arr=new Array();
+                        for(var j=0,len=permissionList.length;j<len;j++){
+                            var s1=permissionList[j].substring(0,permissionList[j].indexOf(":"));
+                            var s2=permissionList[j].substring(0,permissionList[j].lastIndexOf(":"));
+                            if(arr.indexOf(s1) == -1){
+                                arr.push(s1);
+                            }
+                            if(arr.indexOf(s2) == -1){
+                                arr.push(s2);
+                            }
+                        }
+                        console.log(arr)
+                        var menu = menuTest;
+                        var firstNode = null;
+                        for (var i = 0, l1 = menu.length; i < l1; i++) {
+                            
+                            if (arr.indexOf(menu[i].code) != -1) {
+                                if (firstNode == null) {
+                                    firstNode = menu[i].code;
+                                }
+                                menu[i].visible = true;
+                            } else {
+                                menu[i].visible = false;
+                            }
+                             console.log(menu[i].children.length)
+                            for (var j = 0, l2 = menu[i].children.length; j < l2; j++) {
+                                //var count = 0;//当前分组无权限的子项数量
+                                if (arr.indexOf(menu[i].children[j].code) != -1) {
+                                         console.log(menu[i].children[j].code)
+                                        menu[i].children[j].visible = true;
+                                    } else {
+                                        menu[i].children[j].visible = false;
+                                        //count++;
+                                }
+                            }
+                            
+                        }
+                        this.menuTree = menu;
+                         console.log(this.menuTree)
+                        if (this.currNavMenuCode == 'index') {
+                            this.currNavMenuCode = firstNode;
+                        }
+                }
+               
+             }.bind(this));
         }
     
     },
@@ -123,7 +135,13 @@ export default {
 }
 </script>
 <style scoped>
+.loginName{
 
+    text-align: center;
+}
+.logout-btn{
+    margin-left: 10px;
+}
 .child-menu{
     line-height: 45px;
     min-height: 100%;

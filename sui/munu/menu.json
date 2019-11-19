@@ -1,0 +1,48 @@
+[
+    {
+        "code":"shi",
+        "name":"个人网站",
+        "path":"boot.html#",
+        "visible":false,
+        "children":[
+            {
+                "code": "shi:test",
+                "name": "ceshi1",
+                "path": "/boot",
+                "visible": false
+              },
+            {
+                "code": "shi:test2",
+                "name": "ceshi2",
+                "path": "/boot2",
+                "visible": false
+            }
+        ]
+    },
+    {
+        "code":"sys",
+        "name":"权限管理",
+        "path":"shiro_management.html#",
+        "visible":false,
+        "children":[
+            {
+                "code": "sys:user",
+                "name": "用户管理",
+                "path": "/user",
+                "visible": false
+            },
+            {
+                "code": "sys:role",
+                "name": "角色管理",
+                "path": "/role",
+                "visible": false
+            },
+            {
+                "code": "sys:permission",
+                "name": "权限管理",
+                "path": "/index",
+                "visible": false
+            }
+        ]
+    }
+]
