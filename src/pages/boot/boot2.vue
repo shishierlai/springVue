@@ -16,13 +16,14 @@ export default {
   },
   methods:{
       handleOpen(){
-          this.$ajax.post('../boot/getUser',{name:'shishierlai',age:25,address:'3522'},function(data){
+          this.$ajax.post('../api/combine',{name:'shishierlai',age:25,address:'3522'},function(data){
               console.log(data)
           }.bind(this));
       },
       handleOpen1(){
           this.$ajax.post('../api/getUser',{},function(data){
-              console.log(data)
+            var test=data;
+            console.log(test);
           }.bind(this));
       }
   },
